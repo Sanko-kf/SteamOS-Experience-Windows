@@ -14,17 +14,9 @@ taskkill /F /FI "WINDOWTITLE ne null" /FI "IMAGENAME ne steam.exe" /FI "IMAGENAM
 :: --- 2. SET WORKING DIRECTORY ---
 cd /d "C:\Program Files (x86)\Steam"
 
-:: --- 3. CHECK STEAM PROCESS STATUS ---
-:: Verify if Steam is running to choose the correct launch protocol
-tasklist /FI "IMAGENAME eq steam.exe" 2>NUL | find /I /N "steam.exe">NUL
+:: --- LANCER STEAM DIRECTEMENT EN BIG PICTURE ---
+start "" "steam://open/bigpicture"
 
-if "%ERRORLEVEL%"=="0" (
-    :: Steam is active: Trigger Big Picture mode via URI
-    start "" "steam://open/bigpicture"
-) else (
-    :: Steam is closed: Cold boot directly into Big Picture mode
-    start "" steam.exe -bigpicture
-)
 
 :: --- 4. INTERFACE BUFFER ---
 :: Brief pause to let the UI initialize
@@ -68,8 +60,21 @@ timeout /t 10 /nobreak >nul
 :: 10. FINAL TOOL MANAGEMENT
 :: =========================================================
 
-:: A. TERMINATE Mouse Hider (Prevents interference within Steam UI)
-taskkill /F /IM "AutoHideMouseCursor_x64.exe" >nul 2>&1
+:: A. MINIMIZE/HIDE AutoHideMouseCursor (Keep running in background)
+powershell -command ^
+$proc = Get-Process -Name "AutoHideMouseCursor_x64" -ErrorAction SilentlyContinue; ^
+if ($proc) { ^
+    Add-Type -TypeDefinition @"
+    using System;
+    using System.Runtime.InteropServices;
+    public class Win32 {
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    }
+"@; ^
+    [Win32]::ShowWindow($proc.MainWindowHandle, 0)  # 0 = Hide, 2 = Minimize
+}
+
 
 :: B. MINIMIZE Lossless Scaling (Background operation)
 :: Force state "6" (MINIMIZE) via PowerShell for a clean taskbar-free environment

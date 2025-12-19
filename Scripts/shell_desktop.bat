@@ -2,9 +2,12 @@
 title Restore Windows Desktop
 color 0B
 
-:: Re-launches the script in hidden mode to ensure a seamless transition
+:: Re-launch the script in hidden mode using PowerShell
 if "%1"=="hide" goto :main
-start "" mshta vbscript:createobject("wscript.shell").run("""%~0"" hide",0)(window.close)&&exit
+echo [DEBUG] Relancement du script en mode caché via PowerShell...
+powershell -WindowStyle Hidden -Command "Start-Process '%~0' -ArgumentList 'hide' -WindowStyle Hidden"
+exit
+
 :main
 
 :: =========================================================

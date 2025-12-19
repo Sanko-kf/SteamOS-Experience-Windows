@@ -33,12 +33,6 @@ taskkill /F /IM explorer.exe >nul 2>&1
 :: Checks if Steam is already running to determine the launch method
 tasklist /FI "IMAGENAME eq steam.exe" 2>NUL | find /I /N "steam.exe">NUL
 
-if "%ERRORLEVEL%"=="0" (
-    :: CASE A: Steam is active -> Switch to Big Picture view
-    start "" "steam://open/bigpicture"
-) else (
-    :: CASE B: Steam is closed -> Cold boot directly into Big Picture
-    start "" "C:\Program Files (x86)\Steam\steam.exe" -bigpicture
-)
+start "" "steam://open/bigpicture"
 
 exit
